@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="450.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.14-internal" fx:controller="com.example.tictactoes.HelloController">
+    <children>
+        <!-- Game board layout -->
+        <GridPane fx:id="gameBoard" layoutX="41.0" layoutY="100" prefHeight="214.0" prefWidth="212.0">
+            <Button fx:id="button0" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Button fx:id="button1" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <Button fx:id="button2" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+            <Button fx:id="button3" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Button fx:id="button4" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button fx:id="button5" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Button fx:id="button6" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Button fx:id="button7" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Button fx:id="button8" onAction="#handleButtonClick" prefHeight="70.0" prefWidth="70.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <columnConstraints>
+                <ColumnConstraints />
+                <ColumnConstraints />
+                <ColumnConstraints />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+            </rowConstraints>
+        </GridPane>
+
+        <!-- Winner label -->
+        <Label fx:id="winnerLabel" layoutX="127.0" layoutY="60.0" text="Winner:" />
+
+        <!-- Player and computer win counters -->
+        <Label layoutX="25.0" layoutY="20.0" text="Player Wins:" />
+        <Label fx:id="playerWinsLabel" layoutX="100.0" layoutY="20.0" text="0" />
+
+        <Label layoutX="132.0" layoutY="20.0" text="Computer Wins:" />
+        <Label fx:id="computerWinsLabel" layoutX="230.0" layoutY="20.0" text="0" />
+
+        <!-- Reset buttons -->
+        <Button fx:id="resetGameButton" layoutX="41.0" layoutY="345.0" onAction="#resetGame" text="Reset Game" />
+        <Button fx:id="resetScoreButton" layoutX="147.0" layoutY="345.0" onAction="#resetScoreAndGame" text="Reset Score and Game" />
+    </children>
+</AnchorPane>
