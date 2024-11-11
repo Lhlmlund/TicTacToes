@@ -19,7 +19,7 @@ public class HelloController {
     private String currentPlayer = "X";
     private int winCounterPlayer = 0;
     private int winCounterComputer = 0;
-    private String[] board = new String[9];
+    public String[] board = new String[9];
     private boolean gameActive = true;
 
 
@@ -152,7 +152,7 @@ public class HelloController {
     }
 
     // winning moves indexes
-    private boolean checkWinner() {
+    public boolean checkWinner() {
         int[][] winConditions = {
                 {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // Row win index
                 {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // Column win index
@@ -171,7 +171,7 @@ public class HelloController {
 
 
     // board empty
-    private boolean isBoardFull() {
+    public boolean isBoardFull() {
         for (String cell : board) {
             if (cell == null) return false;
         }
@@ -181,18 +181,24 @@ public class HelloController {
     @FXML
 
     // new game
-    private void resetGame() {
-        currentPlayer = "X";
-        gameActive = true;
-        board = new String[9];
+    public void resetGame() {
+        resetGameLogic();
+        // Only update UI here, separate from game logic
         winnerLabel.setText("Winner:");
-
         for (javafx.scene.Node node : gameBoard.getChildren()) {
             if (node instanceof Button) {
                 ((Button) node).setText("");
             }
         }
     }
+
+    public void resetGameLogic() {
+        currentPlayer = "X";
+        gameActive = true;
+        board = new String[9];
+    }
+
+
 
     @FXML
     // new game and score
@@ -203,5 +209,19 @@ public class HelloController {
         computerWinsLabel.setText("0");
         resetGame();
     }
+
+    // helper method to check if cell is empty without JavaFX UI restriction
+    public boolean makeMove(int index, String player) {
+        if (board[index] == null && gameActive) {
+            board[index] = player;
+            return true;  // Move was valid and executed
+        }
+        return false;  // Move was invalid
+    }
+
+
+
+
+
 }
 
