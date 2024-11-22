@@ -16,8 +16,7 @@ public Model() {
 
     board = new String[9];
     resetGame();
-    winCounterPlayer = 0;
-    winCounterComputer = 0;
+    resetScores();
 
 }
 
