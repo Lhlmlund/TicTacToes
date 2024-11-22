@@ -2,7 +2,7 @@ package com.example.tictactoes;
 
 public class Model {
 
-    // Instantiate
+    // Instance variables
 
     public String[] board;
     public String currentPlayer;

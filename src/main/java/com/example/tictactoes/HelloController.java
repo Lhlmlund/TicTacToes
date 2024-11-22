@@ -35,7 +35,7 @@ public class HelloController {
 
         // is empty, null?
         if (model.makeMove(index)) {
-            clickedButton.setText(model.getCurrentPlayer());
+            clickedButton.setText(model.getCurrentPlayer()); // set text currentplayer
 
             if (model.checkWinner()) {
                 winnerLabel.setText(model.getCurrentPlayer() + " Wins!");
@@ -54,21 +54,21 @@ public class HelloController {
 
     @FXML
     private void handleComputerMove() {
-        if (!model.isGameActive()) return;
+        if (!model.isGameActive()) return; // is game active? if not return
 
         int move = findBestMove();
-        if (move != -1) {
+        if (move != -1) { // if not equal to -1
             model.makeMove(move);
-            Button button = (Button) gameBoard.getChildren().get(move);
+            Button button = (Button) gameBoard.getChildren().get(move); // possible 0-8 moveset
             button.setText("O");
 
             if (model.checkWinner()) {
-                winnerLabel.setText("Computer Wins!");
-                updateScores();
-            } else if (model.isBoardFull()) {
+                winnerLabel.setText("Computer Wins!"); // win
+                updateScores();                        // scoreupdate
+            } else if (model.isBoardFull()) {          // nowinner & fullcheck = draw
                 winnerLabel.setText("It's a Draw!");
             } else {
-                model.togglePlayer();
+                model.togglePlayer();                  // else change player.
             }
         }
     }
