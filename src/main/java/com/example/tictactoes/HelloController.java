@@ -16,114 +16,127 @@ public class HelloController {
     @FXML
     private Label computerWinsLabel;
 
-    private String currentPlayer = "X";
-    private int winCounterPlayer = 0;
-    private int winCounterComputer = 0;
-    public String[] board = new String[9];
-    private boolean gameActive = true;
-
-
-
+    private Model model;
 
     @FXML
     public void initialize() {
-        resetGame();
+        model = new Model();
+        updateUI();
     }
 
     @FXML
     private void handleButtonClick(ActionEvent event) {
-        if (!gameActive) return;
+        if (!model.isGameActive()) return;
+
 
         Button clickedButton = (Button) event.getSource();
+        // transform pos into 1D Array
         int index = GridPane.getRowIndex(clickedButton) * 3 + GridPane.getColumnIndex(clickedButton);
 
-        if (board[index] == null) {
-            board[index] = currentPlayer;
-            clickedButton.setText(currentPlayer);
+        // is empty, null?
+        if (model.makeMove(index)) {
+            clickedButton.setText(model.getCurrentPlayer());
 
-            if (checkWinner()) {
-                gameActive = false;
-                if (currentPlayer.equals("X")) {
-                    winCounterPlayer++;
-                    playerWinsLabel.setText(String.valueOf(winCounterPlayer));
-                    winnerLabel.setText("Player Wins!");
-                } else {
-                    winCounterComputer++;
-                    computerWinsLabel.setText(String.valueOf(winCounterComputer));
-                    winnerLabel.setText("Computer Wins!");
-                }
-            } else if (isBoardFull()) {
+            if (model.checkWinner()) {
+                winnerLabel.setText(model.getCurrentPlayer() + " Wins!");
+                updateScores();
+            } else if (model.isBoardFull()) {
                 winnerLabel.setText("It's a Draw!");
-                gameActive = false;
-            } else {
-                togglePlayer();
-                if (currentPlayer.equals("O")) makeComputerMove(); // determine move order
+            } else { // change player
+                model.togglePlayer();
+                if (model.getCurrentPlayer().equals("O")) {
+                    handleComputerMove(); // computers turn
+                }
             }
         }
     }
 
-    private void togglePlayer() {
-        currentPlayer = currentPlayer.equals("X") ? "O" : "X";
+
+    @FXML
+    private void handleComputerMove() {
+        if (!model.isGameActive()) return;
+
+        int move = findBestMove();
+        if (move != -1) {
+            model.makeMove(move);
+            Button button = (Button) gameBoard.getChildren().get(move);
+            button.setText("O");
+
+            if (model.checkWinner()) {
+                winnerLabel.setText("Computer Wins!");
+                updateScores();
+            } else if (model.isBoardFull()) {
+                winnerLabel.setText("It's a Draw!");
+            } else {
+                model.togglePlayer();
+            }
+        }
     }
 
-    private void makeComputerMove() {
-        if (!gameActive) return;
+    @FXML
+    private void updateScores() {
+        playerWinsLabel.setText(String.valueOf(model.getWinCounterPlayer()));
+        computerWinsLabel.setText(String.valueOf(model.getWinCounterComputer()));
+    }
 
-        //Check for winning move
-        Integer winningMove = findWinningOrBlockingMove("O");
-        if (winningMove != null) {
-            executeMove(winningMove);
-            return;
-        }
+    @FXML
+    private void updateUI() {
+        String[] board = model.getBoard();
+        for (int i = 0; i < gameBoard.getChildren().size(); i++) {
+            Button button = (Button) gameBoard.getChildren().get(i);
+            button.setText(board[i] == null ? "" : board[i]);
+        } // convert to String
+        playerWinsLabel.setText(String.valueOf(model.getWinCounterPlayer()));
+        computerWinsLabel.setText(String.valueOf(model.getWinCounterComputer()));
+        winnerLabel.setText("Winner:"); // reset winner label
+    }
 
-        // Block the player from winning
-        Integer blockingMove = findWinningOrBlockingMove("X");
-        if (blockingMove != null) {
-            executeMove(blockingMove);
-            return;
-        }
+    @FXML
 
-        //Take the center if available
-        if (board[4] == null) {
-            executeMove(4);
-            return;
-        }
+    // new game
+    private void resetGame() {
+        model.resetGame();
+        updateUI();
+    }
 
-        //Take a corner if available
+    @FXML
+    // new game and score
+    private void resetScoreAndGame() {
+        model.resetScores();
+        resetGame();
+    }
+
+
+    private int findBestMove() {
+        Integer move;
+
+        // Check for a winning move
+        move = findWinningOrBlockingMove("O");
+        if (move != null) return move;
+
+        // Check for a blocking move
+        move = findWinningOrBlockingMove("X");
+        if (move != null) return move;
+
+        // Take the center if available
+        if (model.getBoard()[4] == null) return 4;
+
+        // Take a corner if available
         int[] corners = {0, 2, 6, 8};
         for (int corner : corners) {
-            if (board[corner] == null) {
-                executeMove(corner);
-                return;
-            }
+            if (model.getBoard()[corner] == null) return corner;
         }
 
         // Take any side if available
         int[] sides = {1, 3, 5, 7};
         for (int side : sides) {
-            if (board[side] == null) {
-                executeMove(side);
-                return;
-            }
+            if (model.getBoard()[side] == null) return side;
         }
+
+        return -1; // No moves available
     }
 
-    // Helper method to execute a move and check for a winner
-    private void executeMove(int index) {
-        board[index] = currentPlayer;
-        Button button = (Button) gameBoard.getChildren().get(index);
-        button.setText("O");
-
-        if (checkWinner()) {
-            winCounterComputer++;
-            computerWinsLabel.setText(String.valueOf(winCounterComputer));
-            winnerLabel.setText("Computer Wins!");
-            gameActive = false;
-        }
-        togglePlayer();
-    }
-
-    // finding winning or blocking move for the specified player
+    // finding winning or blocking move for the player
     private Integer findWinningOrBlockingMove(String player) {
         int[][] winConditions = {
                 {0, 1, 2}, {3, 4, 5}, {6, 7, 8},
@@ -132,96 +145,20 @@ public class HelloController {
         };
 
         for (int[] condition : winConditions) {
-            int count = 0;
-            Integer emptyIndex = null;
+            int countPlayer = 0, emptyIndex = -1;
 
-            for (int i : condition) {
-                if (board[i] != null && board[i].equals(player)) {
-                    count++;
-                } else if (board[i] == null) {
-                    emptyIndex = i;
+            for (int index : condition) {
+                if (player.equals(model.getBoard()[index])) {
+                    countPlayer++;
+                } else if (model.getBoard()[index] == null) {
+                    emptyIndex = index;
                 }
             }
 
-            // If two cells in a win condition are filled by the player and one is empty
-            if (count == 2 && emptyIndex != null) {
-                return emptyIndex;
+            if (countPlayer == 2 && emptyIndex != -1) {
+                return emptyIndex; // Found a winning or blocking move
             }
         }
         return null;
     }
-
-    // winning moves indexes
-    public boolean checkWinner() {
-        int[][] winConditions = {
-                {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // Row win index
-                {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // Column win index
-                {0, 4, 8}, {2, 4, 6}             // Diagonals win index
-        };
-
-        for (int[] condition : winConditions) {
-            if (board[condition[0]] != null &&
-                    board[condition[0]].equals(board[condition[1]]) &&
-                    board[condition[1]].equals(board[condition[2]])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    // board empty
-    public boolean isBoardFull() {
-        for (String cell : board) {
-            if (cell == null) return false;
-        }
-        return true;
-    }
-
-    @FXML
-
-    // new game
-    public void resetGame() {
-        resetGameLogic();
-        // Only update UI here, separate from game logic
-        winnerLabel.setText("Winner:");
-        for (javafx.scene.Node node : gameBoard.getChildren()) {
-            if (node instanceof Button) {
-                ((Button) node).setText("");
-            }
-        }
-    }
-
-    public void resetGameLogic() {
-        currentPlayer = "X";
-        gameActive = true;
-        board = new String[9];
-    }
-
-
-
-    @FXML
-    // new game and score
-    private void resetScoreAndGame() {
-        winCounterPlayer = 0;
-        winCounterComputer = 0;
-        playerWinsLabel.setText("0");
-        computerWinsLabel.setText("0");
-        resetGame();
-    }
-
-    // helper method to check if cell is empty without JavaFX UI restriction
-    public boolean makeMove(int index, String player) {
-        if (board[index] == null && gameActive) {
-            board[index] = player;
-            return true;  // Move was valid and executed
-        }
-        return false;  // Move was invalid
-    }
-
-
-
-
-
 }
-
